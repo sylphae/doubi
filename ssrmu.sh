@@ -27,13 +27,13 @@ BBR_file="${file}/bbr.sh"
 jq_file="${ssr_folder}/jq"
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
-Info="${Green_font_prefix}[信息]${Font_color_suffix}"
-Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
+Info="${Green_font_prefix}[Info]${Font_color_suffix}"
+Error="${Red_font_prefix}[Error]${Font_color_suffix}"
+Tip="${Green_font_prefix}[Tip]${Font_color_suffix}"
 Separator_1="——————————————————————————————"
 
 check_root(){
-	[[ $EUID != 0 ]] && echo -e "${Error} 当前账号非ROOT(或没有ROOT权限)，无法继续操作，请使用${Green_background_prefix} sudo su ${Font_color_suffix}来获取临时ROOT权限（执行后会提示输入当前账号的密码）。" && exit 1
+	[[ $EUID != 0 ]] && echo -e "${Error} The current account is not ROOT (or no ROOT permission) and cannot continue to operate. Please use${Green_background_prefix} sudo su ${Font_color_suffix}to obtain temporary ROOT permissions (you will be prompted to enter the current account password after execution)." && exit 1
 }
 check_sys(){
 	if [[ -f /etc/redhat-release ]]; then
@@ -57,25 +57,25 @@ check_pid(){
 	PID=`ps -ef |grep -v grep | grep server.py |awk '{print $2}'`
 }
 check_crontab(){
-	[[ ! -e "/usr/bin/crontab" ]] && echo -e "${Error} 缺少依赖 Crontab ，请尝试手动安装 CentOS: yum install crond -y , Debian/Ubuntu: apt-get install cron -y !" && exit 1
+	[[ ! -e "/usr/bin/crontab" ]] && echo -e "${Error} Lack of dependency: Crontab, try installing CentOS manually: yum install crond -y , Debian/Ubuntu: apt-get install cron -y !" && exit 1
 }
 SSR_installation_status(){
-	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} 没有发现 ShadowsocksR 文件夹，请检查 !" && exit 1
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} Did not find the ShadowsocksR folder" && exit 1
 }
 Server_Speeder_installation_status(){
-	[[ ! -e ${Server_Speeder_file} ]] && echo -e "${Error} 没有安装 锐速(Server Speeder)，请检查 !" && exit 1
+	[[ ! -e ${Server_Speeder_file} ]] && echo -e "${Error} Server Speeder is not installed" && exit 1
 }
 LotServer_installation_status(){
-	[[ ! -e ${LotServer_file} ]] && echo -e "${Error} 没有安装 LotServer，请检查 !" && exit 1
+	[[ ! -e ${LotServer_file} ]] && echo -e "${Error} LotServer is not installed" && exit 1
 }
 BBR_installation_status(){
 	if [[ ! -e ${BBR_file} ]]; then
-		echo -e "${Error} 没有发现 BBR脚本，开始下载..."
+		echo -e "${Error} BBR Script is not installed, downloading..."
 		cd "${file}"
 		if ! wget -N --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubi/doubi/master/bbr.sh; then
-			echo -e "${Error} BBR 脚本下载失败 !" && exit 1
+			echo -e "${Error} BBR Script download failed." && exit 1
 		else
-			echo -e "${Info} BBR 脚本下载完成 !"
+			echo -e "${Info} BBR Script download completed."
 			chmod +x bbr.sh
 		fi
 	fi
@@ -283,7 +283,7 @@ ss_link_qr(){
 	SSbase64=$(urlsafe_base64 "${method}:${password}@${ip}:${port}")
 	SSurl="ss://${SSbase64}"
 	SSQRcode="http://doub.pw/qr/qr.php?text=${SSurl}"
-	ss_link=" SS    链接 : ${Green_font_prefix}${SSurl}${Font_color_suffix} \n SS  二维码 : ${Green_font_prefix}${SSQRcode}${Font_color_suffix}"
+	ss_link=" SS    Code : ${Green_font_prefix}${SSurl}${Font_color_suffix} \n SS  QR Code : ${Green_font_prefix}${SSQRcode}${Font_color_suffix}"
 }
 ssr_link_qr(){
 	SSRprotocol=$(echo ${protocol} | sed 's/_compatible//g')
@@ -292,7 +292,7 @@ ssr_link_qr(){
 	SSRbase64=$(urlsafe_base64 "${ip}:${port}:${SSRprotocol}:${method}:${SSRobfs}:${SSRPWDbase64}")
 	SSRurl="ssr://${SSRbase64}"
 	SSRQRcode="http://doub.pw/qr/qr.php?text=${SSRurl}"
-	ssr_link=" SSR   链接 : ${Red_font_prefix}${SSRurl}${Font_color_suffix} \n SSR 二维码 : ${Red_font_prefix}${SSRQRcode}${Font_color_suffix} \n "
+	ssr_link=" SSR   Code : ${Red_font_prefix}${SSRurl}${Font_color_suffix} \n SSR QR Code : ${Red_font_prefix}${SSRQRcode}${Font_color_suffix} \n "
 }
 ss_ssr_determine(){
 	protocol_suffix=`echo ${protocol} | awk -F "_" '{print $NF}'`
@@ -331,16 +331,16 @@ View_User(){
 	List_port_user
 	while true
 	do
-		echo -e "请输入要查看账号信息的用户 端口"
-		stty erase '^H' && read -p "(默认: 取消):" View_user_port
-		[[ -z "${View_user_port}" ]] && echo -e "已取消..." && exit 1
+		echo -e "Please enter the user's PORT"
+		stty erase '^H' && read -p "(Default: Cancel):" View_user_port
+		[[ -z "${View_user_port}" ]] && echo -e "Cancelled..." && exit 1
 		View_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${View_user_port}"',')
 		if [[ ! -z ${View_user} ]]; then
 			Get_User_info "${View_user_port}"
 			View_User_info
 			break
 		else
-			echo -e "${Error} 请输入正确的端口 !"
+			echo -e "${Error} Please enter the correct PORT."
 		fi
 	done
 }
@@ -349,65 +349,65 @@ View_User_info(){
 	[[ -z "${ip}" ]] && Get_IP
 	ss_ssr_determine
 	clear && echo "===================================================" && echo
-	echo -e " 用户 [${user_name}] 的配置信息：" && echo
+	echo -e " USER [${user_name}]'s configuration：" && echo
 	echo -e " I  P\t    : ${Green_font_prefix}${ip}${Font_color_suffix}"
-	echo -e " 端口\t    : ${Green_font_prefix}${port}${Font_color_suffix}"
-	echo -e " 密码\t    : ${Green_font_prefix}${password}${Font_color_suffix}"
-	echo -e " 加密\t    : ${Green_font_prefix}${method}${Font_color_suffix}"
-	echo -e " 协议\t    : ${Red_font_prefix}${protocol}${Font_color_suffix}"
-	echo -e " 混淆\t    : ${Red_font_prefix}${obfs}${Font_color_suffix}"
-	echo -e " 设备数限制 : ${Green_font_prefix}${protocol_param}${Font_color_suffix}"
-	echo -e " 单线程限速 : ${Green_font_prefix}${speed_limit_per_con} KB/S${Font_color_suffix}"
-	echo -e " 用户总限速 : ${Green_font_prefix}${speed_limit_per_user} KB/S${Font_color_suffix}"
-	echo -e " 禁止的端口 : ${Green_font_prefix}${forbidden_port} ${Font_color_suffix}"
+	echo -e " PORT\t    : ${Green_font_prefix}${port}${Font_color_suffix}"
+	echo -e " PASSWORD\t    : ${Green_font_prefix}${password}${Font_color_suffix}"
+	echo -e " ENCRYPTION\t    : ${Green_font_prefix}${method}${Font_color_suffix}"
+	echo -e " PROTOCOL\t    : ${Red_font_prefix}${protocol}${Font_color_suffix}"
+	echo -e " OBFS\t    : ${Red_font_prefix}${obfs}${Font_color_suffix}"
+	echo -e " DEVICE LIMIT : ${Green_font_prefix}${protocol_param}${Font_color_suffix}"
+	echo -e " SINGLE THREAT SPEED LIMIT : ${Green_font_prefix}${speed_limit_per_con} KB/S${Font_color_suffix}"
+	echo -e " TOTAL SPEED LIMIT : ${Green_font_prefix}${speed_limit_per_user} KB/S${Font_color_suffix}"
+	echo -e " FORBBIDEN PORT : ${Green_font_prefix}${forbidden_port} ${Font_color_suffix}"
 	echo
-	echo -e " 已使用流量 : 上传: ${Green_font_prefix}${u}${Font_color_suffix} + 下载: ${Green_font_prefix}${d}${Font_color_suffix} = ${Green_font_prefix}${transfer_enable_Used_2}${Font_color_suffix}"
-	echo -e " 剩余的流量 : ${Green_font_prefix}${transfer_enable_Used} ${Font_color_suffix}"
-	echo -e " 用户总流量 : ${Green_font_prefix}${transfer_enable} ${Font_color_suffix}"
+	echo -e " USED transfer : UPLOAD: ${Green_font_prefix}${u}${Font_color_suffix} + DOWNLOAD: ${Green_font_prefix}${d}${Font_color_suffix} = ${Green_font_prefix}${transfer_enable_Used_2}${Font_color_suffix}"
+	echo -e " REMAINING TRANSFER : ${Green_font_prefix}${transfer_enable_Used} ${Font_color_suffix}"
+	echo -e " TOTAL TRANSFER : ${Green_font_prefix}${transfer_enable} ${Font_color_suffix}"
 	echo -e "${ss_link}"
 	echo -e "${ssr_link}"
 	echo -e " ${Green_font_prefix} 提示: ${Font_color_suffix}
- 在浏览器中，打开二维码链接，就可以看到二维码图片。
- 协议和混淆后面的[ _compatible ]，指的是 兼容原版协议/混淆。"
+ Open the QR Code link in your WebBrowser you'll see the QR Code image.
+ After PROTOCOL and OBFS there's a [ _compatible ], means that compatible with the original or not."
 	echo && echo "==================================================="
 }
 # 设置 配置信息
 Set_config_user(){
-	echo "请输入要设置的用户 用户名(请勿重复, 用于区分, 不支持中文, 会报错 !)"
-	stty erase '^H' && read -p "(默认: doubi):" ssr_user
+	echo "Please enter the user's USERNAME"
+	stty erase '^H' && read -p "(Default: doubi):" ssr_user
 	[[ -z "${ssr_user}" ]] && ssr_user="doubi"
-	echo && echo ${Separator_1} && echo -e "	用户名 : ${Green_font_prefix}${ssr_user}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	USERNAME : ${Green_font_prefix}${ssr_user}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_port(){
 	while true
 	do
-	echo -e "请输入要设置的用户 端口(请勿重复, 用于区分)"
-	stty erase '^H' && read -p "(默认: 2333):" ssr_port
+	echo -e "Please enter the user's PORT"
+	stty erase '^H' && read -p "(Default: 2333):" ssr_port
 	[[ -z "$ssr_port" ]] && ssr_port="2333"
 	expr ${ssr_port} + 0 &>/dev/null
 	if [[ $? == 0 ]]; then
 		if [[ ${ssr_port} -ge 1 ]] && [[ ${ssr_port} -le 65535 ]]; then
-			echo && echo ${Separator_1} && echo -e "	端口 : ${Green_font_prefix}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
+			echo && echo ${Separator_1} && echo -e "	PORT : ${Green_font_prefix}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
 			break
 		else
-			echo -e "${Error} 请输入正确的数字(1-65535)"
+			echo -e "${Error} Please enter the correct NUMBER(1-65535)"
 		fi
 	else
-		echo -e "${Error} 请输入正确的数字(1-65535)"
+		echo -e "${Error} Please enter the correct NUMBER(1-65535)"
 	fi
 	done
 }
 Set_config_password(){
-	echo "请输入要设置的用户 密码"
-	stty erase '^H' && read -p "(默认: doub.io):" ssr_password
+	echo "Please enter the user's PASSWORD"
+	stty erase '^H' && read -p "(Default: doub.io):" ssr_password
 	[[ -z "${ssr_password}" ]] && ssr_password="doub.io"
-	echo && echo ${Separator_1} && echo -e "	密码 : ${Green_font_prefix}${ssr_password}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	PASSWORD : ${Green_font_prefix}${ssr_password}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_method(){
-	echo -e "请选择要设置的用户 加密方式
+	echo -e "Please enter the user's ENCRYPTION
  ${Green_font_prefix} 1.${Font_color_suffix} none
- ${Tip} 如果使用 auth_chain_* 系列协议，建议加密方式选择 none (该系列协议自带 RC4 加密)，混淆随意
- 
+ ${Tip} If use auth_chain_* series, it is recommended to select NONE for the encryption method (the series protocol comes with RC4 encryption).
+
  ${Green_font_prefix} 2.${Font_color_suffix} rc4
  ${Green_font_prefix} 3.${Font_color_suffix} rc4-md5
  ${Green_font_prefix} 4.${Font_color_suffix} rc4-md5-6
@@ -427,8 +427,8 @@ Set_config_method(){
  ${Green_font_prefix}14.${Font_color_suffix} salsa20
  ${Green_font_prefix}15.${Font_color_suffix} chacha20
  ${Green_font_prefix}16.${Font_color_suffix} chacha20-ietf
- ${Tip} salsa20/chacha20-*系列加密方式，需要额外安装依赖 libsodium ，否则会无法启动ShadowsocksR !" && echo
-	stty erase '^H' && read -p "(默认: 5. aes-128-ctr):" ssr_method
+ ${Tip} salsa20/chacha20-* series encryption needs to install libsodium additionally." && echo
+	stty erase '^H' && read -p "(Default: 5. aes-128-ctr):" ssr_method
 	[[ -z "${ssr_method}" ]] && ssr_method="5"
 	if [[ ${ssr_method} == "1" ]]; then
 		ssr_method="none"
@@ -465,18 +465,18 @@ Set_config_method(){
 	else
 		ssr_method="aes-128-ctr"
 	fi
-	echo && echo ${Separator_1} && echo -e "	加密 : ${Green_font_prefix}${ssr_method}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	ENCRYPTION : ${Green_font_prefix}${ssr_method}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_protocol(){
-	echo -e "请选择要设置的用户 协议插件
+	echo -e "Please enter the user's PROTOCOL
  ${Green_font_prefix}1.${Font_color_suffix} origin
  ${Green_font_prefix}2.${Font_color_suffix} auth_sha1_v4
  ${Green_font_prefix}3.${Font_color_suffix} auth_aes128_md5
  ${Green_font_prefix}4.${Font_color_suffix} auth_aes128_sha1
  ${Green_font_prefix}5.${Font_color_suffix} auth_chain_a
  ${Green_font_prefix}6.${Font_color_suffix} auth_chain_b
- ${Tip} 如果使用 auth_chain_* 系列协议，建议加密方式选择 none (该系列协议自带 RC4 加密)，混淆随意" && echo
-	stty erase '^H' && read -p "(默认: 3. auth_aes128_md5):" ssr_protocol
+ ${Tip} If use auth_chain_* series, it is recommended to select NONE for the encryption method (the series protocol comes with RC4 encryption)." && echo
+	stty erase '^H' && read -p "(Default: 3. auth_aes128_md5):" ssr_protocol
 	[[ -z "${ssr_protocol}" ]] && ssr_protocol="3"
 	if [[ ${ssr_protocol} == "1" ]]; then
 		ssr_protocol="origin"
@@ -493,10 +493,10 @@ Set_config_protocol(){
 	else
 		ssr_protocol="auth_aes128_md5"
 	fi
-	echo && echo ${Separator_1} && echo -e "	协议 : ${Green_font_prefix}${ssr_protocol}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	PROTOCOL : ${Green_font_prefix}${ssr_protocol}${Font_color_suffix}" && echo ${Separator_1} && echo
 	if [[ ${ssr_protocol} != "origin" ]]; then
 		if [[ ${ssr_protocol} == "auth_sha1_v4" ]]; then
-			stty erase '^H' && read -p "是否设置 协议插件兼容原版(_compatible)？[Y/n]" ssr_protocol_yn
+			stty erase '^H' && read -p "Compatible with the original or not (_compatible)? [Y/n]" ssr_protocol_yn
 			[[ -z "${ssr_protocol_yn}" ]] && ssr_protocol_yn="y"
 			[[ $ssr_protocol_yn == [Yy] ]] && ssr_protocol=${ssr_protocol}"_compatible"
 			echo
@@ -504,15 +504,15 @@ Set_config_protocol(){
 	fi
 }
 Set_config_obfs(){
-	echo -e "请选择要设置的用户 混淆插件
+	echo -e "Please enter the user's OBFS
  ${Green_font_prefix}1.${Font_color_suffix} plain
  ${Green_font_prefix}2.${Font_color_suffix} http_simple
  ${Green_font_prefix}3.${Font_color_suffix} http_post
  ${Green_font_prefix}4.${Font_color_suffix} random_head
  ${Green_font_prefix}5.${Font_color_suffix} tls1.2_ticket_auth
- ${Tip} 如果使用 ShadowsocksR 代理游戏，建议选择 混淆兼容原版或 plain 混淆，然后客户端选择 plain，否则会增加延迟 !
- 另外, 如果你选择了 tls1.2_ticket_auth，那么客户端可以选择 tls1.2_ticket_fastauth，这样即能伪装特征 又不会增加延迟 !" && echo
-	stty erase '^H' && read -p "(默认: 5. tls1.2_ticket_auth):" ssr_obfs
+ ${Tip} If use ShadowsocksR to proxy games, it is recommended to select _compatible or plain for OBFS.
+ Otherwise tls1.2_ticket_auth." && echo
+	stty erase '^H' && read -p "(Default: 5. tls1.2_ticket_auth):" ssr_obfs
 	[[ -z "${ssr_obfs}" ]] && ssr_obfs="5"
 	if [[ ${ssr_obfs} == "1" ]]; then
 		ssr_obfs="plain"
@@ -527,9 +527,9 @@ Set_config_obfs(){
 	else
 		ssr_obfs="tls1.2_ticket_auth"
 	fi
-	echo && echo ${Separator_1} && echo -e "	混淆 : ${Green_font_prefix}${ssr_obfs}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	OBFS : ${Green_font_prefix}${ssr_obfs}${Font_color_suffix}" && echo ${Separator_1} && echo
 	if [[ ${ssr_obfs} != "plain" ]]; then
-			stty erase '^H' && read -p "是否设置 混淆插件兼容原版(_compatible)？[Y/n]" ssr_obfs_yn
+			stty erase '^H' && read -p "Compatible with the original or not (_compatible)? [Y/n]" ssr_obfs_yn
 			[[ -z "${ssr_obfs_yn}" ]] && ssr_obfs_yn="y"
 			[[ $ssr_obfs_yn == [Yy] ]] && ssr_obfs=${ssr_obfs}"_compatible"
 			echo
@@ -538,40 +538,40 @@ Set_config_obfs(){
 Set_config_protocol_param(){
 	while true
 	do
-	echo -e "请输入要设置的用户 欲限制的设备数 (${Green_font_prefix} auth_* 系列协议 不兼容原版才有效 ${Font_color_suffix})"
-	echo -e "${Tip} 设备数限制：每个端口同一时间能链接的客户端数量(多端口模式，每个端口都是独立计算)，建议最少 2个。"
-	stty erase '^H' && read -p "(默认: 无限):" ssr_protocol_param
+	echo -e "Please enter the user's DEVICE LIMIT (${Green_font_prefix} auth_* series are selected not to compatible ${Font_color_suffix})"
+	echo -e "${Tip} DEVICE LIMIT：The number of clients that can be connected to each port at the same time. Recommended at least 2."
+	stty erase '^H' && read -p "(Default: UNLIMITED):" ssr_protocol_param
 	[[ -z "$ssr_protocol_param" ]] && ssr_protocol_param="" && echo && break
 	expr ${ssr_protocol_param} + 0 &>/dev/null
 	if [[ $? == 0 ]]; then
 		if [[ ${ssr_protocol_param} -ge 1 ]] && [[ ${ssr_protocol_param} -le 9999 ]]; then
-			echo && echo ${Separator_1} && echo -e "	设备数限制 : ${Green_font_prefix}${ssr_protocol_param}${Font_color_suffix}" && echo ${Separator_1} && echo
+			echo && echo ${Separator_1} && echo -e "	DEVICE LIMIT : ${Green_font_prefix}${ssr_protocol_param}${Font_color_suffix}" && echo ${Separator_1} && echo
 			break
 		else
-			echo -e "${Error} 请输入正确的数字(1-9999)"
+			echo -e "${Error} Please enter the correct NUMBER(1-9999)"
 		fi
 	else
-		echo -e "${Error} 请输入正确的数字(1-9999)"
+		echo -e "${Error} Please enter the correct NUMBER(1-9999)"
 	fi
 	done
 }
 Set_config_speed_limit_per_con(){
 	while true
 	do
-	echo -e "请输入要设置的用户 单线程 限速上限(单位：KB/S)"
-	echo -e "${Tip} 单线程限速：每个端口 单线程的限速上限，多线程即无效。"
-	stty erase '^H' && read -p "(默认: 无限):" ssr_speed_limit_per_con
+	echo -e "lease enter the user's SINGLE THREAT SPEED LIMIT (Ukb/S)"
+	echo -e "${Tip} SINGLE THREAT SPEED LIMIT：Each PORT speed limit, unavailable in multithreating mode."
+	stty erase '^H' && read -p "(Default: UNLIMITED):" ssr_speed_limit_per_con
 	[[ -z "$ssr_speed_limit_per_con" ]] && ssr_speed_limit_per_con=0 && echo && break
 	expr ${ssr_speed_limit_per_con} + 0 &>/dev/null
 	if [[ $? == 0 ]]; then
 		if [[ ${ssr_speed_limit_per_con} -ge 1 ]] && [[ ${ssr_speed_limit_per_con} -le 131072 ]]; then
-			echo && echo ${Separator_1} && echo -e "	单线程限速 : ${Green_font_prefix}${ssr_speed_limit_per_con} KB/S${Font_color_suffix}" && echo ${Separator_1} && echo
+			echo && echo ${Separator_1} && echo -e "	SINGLE THREAT SPEED LIMIT : ${Green_font_prefix}${ssr_speed_limit_per_con} KB/S${Font_color_suffix}" && echo ${Separator_1} && echo
 			break
 		else
-			echo -e "${Error} 请输入正确的数字(1-131072)"
+			echo -e "${Error} Please enter the correct NUMBER(1-131072)"
 		fi
 	else
-		echo -e "${Error} 请输入正确的数字(1-131072)"
+		echo -e "${Error} Please enter the correct NUMBER(1-131072)"
 	fi
 	done
 }
@@ -581,7 +581,7 @@ Set_config_speed_limit_per_user(){
 	echo
 	echo -e "请输入要设置的用户 总速度 限速上限(单位：KB/S)"
 	echo -e "${Tip} 端口总限速：每个端口 总速度 限速上限，单个端口整体限速。"
-	stty erase '^H' && read -p "(默认: 无限):" ssr_speed_limit_per_user
+	stty erase '^H' && read -p "(Default: 无限):" ssr_speed_limit_per_user
 	[[ -z "$ssr_speed_limit_per_user" ]] && ssr_speed_limit_per_user=0 && echo && break
 	expr ${ssr_speed_limit_per_user} + 0 &>/dev/null
 	if [[ $? == 0 ]]; then
@@ -601,7 +601,7 @@ Set_config_transfer(){
 	do
 	echo
 	echo -e "请输入要设置的用户 可使用的总流量上限(单位: GB, 1-838868 GB)"
-	stty erase '^H' && read -p "(默认: 无限):" ssr_transfer
+	stty erase '^H' && read -p "(Default: 无限):" ssr_transfer
 	[[ -z "$ssr_transfer" ]] && ssr_transfer="838868" && echo && break
 	expr ${ssr_transfer} + 0 &>/dev/null
 	if [[ $? == 0 ]]; then
@@ -623,7 +623,7 @@ Set_config_forbid(){
 封禁多个端口格式: 23,465
 封禁  端口段格式: 233-266
 封禁多种格式端口: 25,465,233-666 (不带冒号:)"
-	stty erase '^H' && read -p "(默认为空 不禁止访问任何端口):" ssr_forbid
+	stty erase '^H' && read -p "(Default为空 不禁止访问任何端口):" ssr_forbid
 	[[ -z "${ssr_forbid}" ]] && ssr_forbid=""
 	echo && echo ${Separator_1} && echo -e "	禁止的端口 : ${Green_font_prefix}${ssr_forbid}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
@@ -648,7 +648,7 @@ Set_config_enable(){
 	done
 	if [[ "${enable}" == "1" ]]; then
 		echo -e "端口 [${ssr_port}] 的账号状态为：${Green_font_prefix}启用${Font_color_suffix} , 是否切换为 ${Red_font_prefix}禁用${Font_color_suffix} ?[Y/n]"
-		stty erase '^H' && read -p "(默认: Y):" ssr_enable_yn
+		stty erase '^H' && read -p "(Default: Y):" ssr_enable_yn
 		[[ -z "${ssr_enable_yn}" ]] && ssr_enable_yn="y"
 		if [[ "${ssr_enable_yn}" == [Yy] ]]; then
 			ssr_enable="0"
@@ -657,7 +657,7 @@ Set_config_enable(){
 		fi
 	elif [[ "${enable}" == "0" ]]; then
 		echo -e "端口 [${ssr_port}] 的账号状态为：${Green_font_prefix}禁用${Font_color_suffix} , 是否切换为 ${Red_font_prefix}启用${Font_color_suffix} ?[Y/n]"
-		stty erase '^H' && read -p "(默认: Y):" ssr_enable_yn
+		stty erase '^H' && read -p "(Default: Y):" ssr_enable_yn
 		[[ -z "${ssr_enable_yn}" ]] && ssr_enable_yn = "y"
 		if [[ "${ssr_enable_yn}" == [Yy] ]]; then
 			ssr_enable="1"
@@ -679,7 +679,7 @@ Set_user_api_server_pub_addr(){
 		fi
 	fi
 	echo "请输入用户配置中要显示的 服务器IP或域名 (当服务器有多个IP时，可以指定用户配置中显示的IP或者域名)"
-	stty erase '^H' && read -p "(默认自动检测外网IP):" ssr_server_pub_addr
+	stty erase '^H' && read -p "(Default自动检测外网IP):" ssr_server_pub_addr
 	if [[ -z "${ssr_server_pub_addr}" ]]; then
 		Get_IP
 		if [[ ${ip} == "VPS_IP" ]]; then
@@ -961,7 +961,7 @@ Update_SSR(){
 Uninstall_SSR(){
 	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} 没有安装 ShadowsocksR，请检查 !" && exit 1
 	echo "确定要 卸载ShadowsocksR？[y/N]" && echo
-	stty erase '^H' && read -p "(默认: n):" unyn
+	stty erase '^H' && read -p "(Default: n):" unyn
 	[[ -z ${unyn} ]] && unyn="n"
 	if [[ ${unyn} == [Yy] ]]; then
 		check_pid
@@ -999,7 +999,7 @@ Check_Libsodium_ver(){
 Install_Libsodium(){
 	if [[ -e ${Libsodiumr_file} ]]; then
 		echo -e "${Error} libsodium 已安装 , 是否覆盖安装(更新)？[y/N]"
-		stty erase '^H' && read -p "(默认: n):" yn
+		stty erase '^H' && read -p "(Default: n):" yn
 		[[ -z ${yn} ]] && yn="n"
 		if [[ ${yn} == [Nn] ]]; then
 			echo "已取消..." && exit 1
@@ -1097,7 +1097,7 @@ View_user_connection_info(){
 	echo && echo -e "请选择要显示的格式：
  ${Green_font_prefix}1.${Font_color_suffix} 显示 IP 格式
  ${Green_font_prefix}2.${Font_color_suffix} 显示 IP+IP归属地 格式" && echo
-	stty erase '^H' && read -p "(默认: 1):" ssr_connection_info
+	stty erase '^H' && read -p "(Default: 1):" ssr_connection_info
 	[[ -z "${ssr_connection_info}" ]] && ssr_connection_info="1"
 	if [[ ${ssr_connection_info} == "1" ]]; then
 		View_user_connection_info_1 ""
@@ -1143,7 +1143,7 @@ Modify_port(){
 	while true
 	do
 		echo -e "请输入要修改的用户 端口"
-		stty erase '^H' && read -p "(默认: 取消):" ssr_port
+		stty erase '^H' && read -p "(Default: 取消):" ssr_port
 		[[ -z "${ssr_port}" ]] && echo -e "已取消..." && exit 1
 		Modify_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${ssr_port}"',')
 		if [[ ! -z ${Modify_user} ]]; then
@@ -1173,7 +1173,7 @@ Modify_Config(){
  ${Green_font_prefix}13.${Font_color_suffix} 修改 用户配置中显示的IP或域名
  
  ${Tip} 用户的用户名和端口是无法修改，如果需要修改请使用脚本的 手动修改功能 !" && echo
-	stty erase '^H' && read -p "(默认: 取消):" ssr_modify
+	stty erase '^H' && read -p "(Default: 取消):" ssr_modify
 	[[ -z "${ssr_modify}" ]] && echo "已取消..." && exit 1
 	if [[ ${ssr_modify} == "1" ]]; then
 		Add_port_user
@@ -1283,7 +1283,7 @@ Del_port_user(){
 	while true
 	do
 		echo -e "请输入要删除的用户 端口"
-		stty erase '^H' && read -p "(默认: 取消):" del_user_port
+		stty erase '^H' && read -p "(Default: 取消):" del_user_port
 		[[ -z "${del_user_port}" ]] && echo -e "已取消..." && exit 1
 		del_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${del_user_port}"',')
 		if [[ ! -z ${del_user} ]]; then
@@ -1306,7 +1306,7 @@ Manually_Modify_Config(){
 	SSR_installation_status
 	vi ${config_user_mudb_file}
 	echo "是否现在重启ShadowsocksR？[Y/n]" && echo
-	stty erase '^H' && read -p "(默认: y):" yn
+	stty erase '^H' && read -p "(Default: y):" yn
 	[[ -z ${yn} ]] && yn="y"
 	if [[ ${yn} == [Yy] ]]; then
 		Restart_SSR
@@ -1314,24 +1314,24 @@ Manually_Modify_Config(){
 }
 Clear_transfer(){
 	SSR_installation_status
-	echo && echo -e "你要做什么？
- ${Green_font_prefix}1.${Font_color_suffix}  清零 单个用户已使用流量
- ${Green_font_prefix}2.${Font_color_suffix}  清零 所有用户已使用流量(不可挽回)
+	echo && echo -e "What to do next?
+ ${Green_font_prefix}1.${Font_color_suffix}  Clear SINGLE User TOTAL TRANSFER
+ ${Green_font_prefix}2.${Font_color_suffix}  Clear ALL User TOTAL TRANSFER
  ${Green_font_prefix}3.${Font_color_suffix}  启动 定时所有用户流量清零
  ${Green_font_prefix}4.${Font_color_suffix}  停止 定时所有用户流量清零
  ${Green_font_prefix}5.${Font_color_suffix}  修改 定时所有用户流量清零" && echo
-	stty erase '^H' && read -p "(默认: 取消):" ssr_modify
-	[[ -z "${ssr_modify}" ]] && echo "已取消..." && exit 1
+	stty erase '^H' && read -p "(Default: Cancel):" ssr_modify
+	[[ -z "${ssr_modify}" ]] && echo "Cancelled..." && exit 1
 	if [[ ${ssr_modify} == "1" ]]; then
 		Clear_transfer_one
 	elif [[ ${ssr_modify} == "2" ]]; then
-		echo "确定要 清零 所有用户已使用流量？[y/N]" && echo
-		stty erase '^H' && read -p "(默认: n):" yn
+		echo "Are you sure want to clear ALL User TOTAL TRANSFER [y/N]" && echo
+		stty erase '^H' && read -p "(Default: n):" yn
 		[[ -z ${yn} ]] && yn="n"
 		if [[ ${yn} == [Yy] ]]; then
 			Clear_transfer_all
 		else
-			echo "取消..."
+			echo "Cancelled..."
 		fi
 	elif [[ ${ssr_modify} == "3" ]]; then
 		check_crontab
@@ -1344,7 +1344,7 @@ Clear_transfer(){
 		check_crontab
 		Clear_transfer_all_cron_modify
 	else
-		echo -e "${Error} 请输入正确的数字(1-5)" && exit 1
+		echo -e "${Error} Please enter correct NUMBER(1-5)" && exit 1
 	fi
 }
 Clear_transfer_one(){
@@ -1352,7 +1352,7 @@ Clear_transfer_one(){
 	while true
 	do
 		echo -e "请输入要清零已使用流量的用户 端口"
-		stty erase '^H' && read -p "(默认: 取消):" Clear_transfer_user_port
+		stty erase '^H' && read -p "(Default: 取消):" Clear_transfer_user_port
 		[[ -z "${Clear_transfer_user_port}" ]] && echo -e "已取消..." && exit 1
 		Clear_transfer_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${Clear_transfer_user_port}"',')
 		if [[ ! -z ${Clear_transfer_user} ]]; then
@@ -1424,7 +1424,7 @@ Set_crontab(){
  ${Green_font_prefix} 0 2 */7 * * ${Font_color_suffix} 代表 每7天2点0分 清零已使用流量
  ${Green_font_prefix} 0 2 * * 0 ${Font_color_suffix} 代表 每个星期日(7) 清零已使用流量
  ${Green_font_prefix} 0 2 * * 3 ${Font_color_suffix} 代表 每个星期三(3) 清零已使用流量" && echo
-	stty erase '^H' && read -p "(默认: 0 2 1 * * 每月1日2点0分):" Crontab_time
+	stty erase '^H' && read -p "(Default: 0 2 1 * * 每月1日2点0分):" Crontab_time
 	[[ -z "${Crontab_time}" ]] && Crontab_time="0 2 1 * *"
 }
 Start_SSR(){
@@ -1463,7 +1463,7 @@ Configure_Server_Speeder(){
  ${Green_font_prefix}6.${Font_color_suffix} 查看 锐速 状态
  
  注意： 锐速和LotServer不能同时安装/启动！" && echo
-	stty erase '^H' && read -p "(默认: 取消):" server_speeder_num
+	stty erase '^H' && read -p "(Default: 取消):" server_speeder_num
 	[[ -z "${server_speeder_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${server_speeder_num} == "1" ]]; then
 		Install_ServerSpeeder
@@ -1507,7 +1507,7 @@ Install_ServerSpeeder(){
 }
 Uninstall_ServerSpeeder(){
 	echo "确定要卸载 锐速(Server Speeder)？[y/N]" && echo
-	stty erase '^H' && read -p "(默认: n):" unyn
+	stty erase '^H' && read -p "(Default: n):" unyn
 	[[ -z ${unyn} ]] && echo && echo "已取消..." && exit 1
 	if [[ ${unyn} == [Yy] ]]; then
 		chattr -i /serverspeeder/etc/apx*
@@ -1527,7 +1527,7 @@ Configure_LotServer(){
  ${Green_font_prefix}6.${Font_color_suffix} 查看 LotServer 状态
  
  注意： 锐速和LotServer不能同时安装/启动！" && echo
-	stty erase '^H' && read -p "(默认: 取消):" lotserver_num
+	stty erase '^H' && read -p "(Default: 取消):" lotserver_num
 	[[ -z "${lotserver_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${lotserver_num} == "1" ]]; then
 		Install_LotServer
@@ -1568,7 +1568,7 @@ Install_LotServer(){
 }
 Uninstall_LotServer(){
 	echo "确定要卸载 LotServer？[y/N]" && echo
-	stty erase '^H' && read -p "(默认: n):" unyn
+	stty erase '^H' && read -p "(Default: n):" unyn
 	[[ -z ${unyn} ]] && echo && echo "已取消..." && exit 1
 	if [[ ${unyn} == [Yy] ]]; then
 		wget --no-check-certificate -qO /tmp/appex.sh "https://raw.githubusercontent.com/0oVicero0/serverSpeeder_Install/master/appex.sh" && bash /tmp/appex.sh 'uninstall'
@@ -1588,7 +1588,7 @@ echo -e "${Green_font_prefix} [安装前 请注意] ${Font_color_suffix}
 1. 安装开启BBR，需要更换内核，存在更换失败等风险(重启后无法开机)
 2. 本脚本仅支持 Debian / Ubuntu 系统更换内核，OpenVZ和Docker 不支持更换内核
 3. Debian 更换内核过程中会提示 [ 是否终止卸载内核 ] ，请选择 ${Green_font_prefix} NO ${Font_color_suffix}" && echo
-	stty erase '^H' && read -p "(默认: 取消):" bbr_num
+	stty erase '^H' && read -p "(Default: 取消):" bbr_num
 	[[ -z "${bbr_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${bbr_num} == "1" ]]; then
 		Install_BBR
@@ -1633,10 +1633,10 @@ Other_functions(){
   ${Green_font_prefix}5.${Font_color_suffix} 一键解封 BT/PT/SPAM (iptables)
 ————————————
   ${Green_font_prefix}6.${Font_color_suffix} 切换 ShadowsocksR日志输出模式
-  —— 说明：SSR默认只输出错误日志，此项可切换为输出详细的访问日志。
+  —— 说明：SSRDefault只输出错误日志，此项可切换为输出详细的访问日志。
   ${Green_font_prefix}7.${Font_color_suffix} 监控 ShadowsocksR服务端运行状态
   —— 说明：该功能适合于SSR服务端经常进程结束，启动该功能后会每分钟检测一次，当进程不存在则自动启动SSR服务端。" && echo
-	stty erase '^H' && read -p "(默认: 取消):" other_num
+	stty erase '^H' && read -p "(Default: 取消):" other_num
 	[[ -z "${other_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${other_num} == "1" ]]; then
 		Configure_BBR
@@ -1673,7 +1673,7 @@ Set_config_connect_verbose_info(){
 	if [[ ${connect_verbose_info} = "0" ]]; then
 		echo && echo -e "当前日志模式: ${Green_font_prefix}简单模式（只输出错误日志）${Font_color_suffix}" && echo
 		echo -e "确定要切换为 ${Green_font_prefix}详细模式（输出详细连接日志+错误日志）${Font_color_suffix}？[y/N]"
-		stty erase '^H' && read -p "(默认: n):" connect_verbose_info_ny
+		stty erase '^H' && read -p "(Default: n):" connect_verbose_info_ny
 		[[ -z "${connect_verbose_info_ny}" ]] && connect_verbose_info_ny="n"
 		if [[ ${connect_verbose_info_ny} == [Yy] ]]; then
 			ssr_connect_verbose_info="1"
@@ -1685,7 +1685,7 @@ Set_config_connect_verbose_info(){
 	else
 		echo && echo -e "当前日志模式: ${Green_font_prefix}详细模式（输出详细连接日志+错误日志）${Font_color_suffix}" && echo
 		echo -e "确定要切换为 ${Green_font_prefix}简单模式（只输出错误日志）${Font_color_suffix}？[y/N]"
-		stty erase '^H' && read -p "(默认: n):" connect_verbose_info_ny
+		stty erase '^H' && read -p "(Default: n):" connect_verbose_info_ny
 		[[ -z "${connect_verbose_info_ny}" ]] && connect_verbose_info_ny="n"
 		if [[ ${connect_verbose_info_ny} == [Yy] ]]; then
 			ssr_connect_verbose_info="0"
@@ -1702,7 +1702,7 @@ Set_crontab_monitor_ssr(){
 	if [[ -z "${crontab_monitor_ssr_status}" ]]; then
 		echo && echo -e "当前监控模式: ${Green_font_prefix}未开启${Font_color_suffix}" && echo
 		echo -e "确定要开启为 ${Green_font_prefix}ShadowsocksR服务端运行状态监控${Font_color_suffix} 功能吗？(当进程关闭则自动启动SSR服务端)[Y/n]"
-		stty erase '^H' && read -p "(默认: y):" crontab_monitor_ssr_status_ny
+		stty erase '^H' && read -p "(Default: y):" crontab_monitor_ssr_status_ny
 		[[ -z "${crontab_monitor_ssr_status_ny}" ]] && crontab_monitor_ssr_status_ny="y"
 		if [[ ${crontab_monitor_ssr_status_ny} == [Yy] ]]; then
 			crontab_monitor_ssr_cron_start
@@ -1712,7 +1712,7 @@ Set_crontab_monitor_ssr(){
 	else
 		echo && echo -e "当前监控模式: ${Green_font_prefix}已开启${Font_color_suffix}" && echo
 		echo -e "确定要关闭为 ${Green_font_prefix}ShadowsocksR服务端运行状态监控${Font_color_suffix} 功能吗？(当进程关闭则自动启动SSR服务端)[y/N]"
-		stty erase '^H' && read -p "(默认: n):" crontab_monitor_ssr_status_ny
+		stty erase '^H' && read -p "(Default: n):" crontab_monitor_ssr_status_ny
 		[[ -z "${crontab_monitor_ssr_status_ny}" ]] && crontab_monitor_ssr_status_ny="n"
 		if [[ ${crontab_monitor_ssr_status_ny} == [Yy] ]]; then
 			crontab_monitor_ssr_cron_stop
@@ -1770,7 +1770,7 @@ Update_Shell(){
 	[[ -z ${sh_new_ver} ]] && echo -e "${Error} 检测最新版本失败 !" && exit 0
 	if [[ ${sh_new_ver} != ${sh_ver} ]]; then
 		echo -e "发现新版本[ ${sh_new_ver} ]，是否更新？[Y/n]"
-		stty erase '^H' && read -p "(默认: y):" yn
+		stty erase '^H' && read -p "(Default: y):" yn
 		[[ -z "${yn}" ]] && yn="y"
 		if [[ ${yn} == [Yy] ]]; then
 			if [[ -e "/etc/init.d/ssrmu" ]]; then
@@ -1817,27 +1817,27 @@ else
 	echo -e "  ShadowsocksR MuJSON一键管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
   ---- Toyo | doub.io/ss-jc60 ----
 
-  ${Green_font_prefix}1.${Font_color_suffix} 安装 ShadowsocksR
-  ${Green_font_prefix}2.${Font_color_suffix} 更新 ShadowsocksR
-  ${Green_font_prefix}3.${Font_color_suffix} 卸载 ShadowsocksR
-  ${Green_font_prefix}4.${Font_color_suffix} 安装 libsodium(chacha20)
+  ${Green_font_prefix}1.${Font_color_suffix} INSTALL ShadowsocksR
+  ${Green_font_prefix}2.${Font_color_suffix} UPDATE ShadowsocksR
+  ${Green_font_prefix}3.${Font_color_suffix} UNINSTALL ShadowsocksR
+  ${Green_font_prefix}4.${Font_color_suffix} INSTALL libsodium(chacha20)
 ————————————
-  ${Green_font_prefix}5.${Font_color_suffix} 查看 账号信息
-  ${Green_font_prefix}6.${Font_color_suffix} 显示 连接信息
-  ${Green_font_prefix}7.${Font_color_suffix} 设置 用户配置
-  ${Green_font_prefix}8.${Font_color_suffix} 手动 修改配置
-  ${Green_font_prefix}9.${Font_color_suffix} 配置 流量清零
+  ${Green_font_prefix}5.${Font_color_suffix} View User Configuration
+  ${Green_font_prefix}6.${Font_color_suffix} Connection Configuration
+  ${Green_font_prefix}7.${Font_color_suffix} Set User Configuration
+  ${Green_font_prefix}8.${Font_color_suffix} Set Configuration Manually
+  ${Green_font_prefix}9.${Font_color_suffix} Set Transfer to ZERO
 ————————————
- ${Green_font_prefix}10.${Font_color_suffix} 启动 ShadowsocksR
- ${Green_font_prefix}11.${Font_color_suffix} 停止 ShadowsocksR
- ${Green_font_prefix}12.${Font_color_suffix} 重启 ShadowsocksR
- ${Green_font_prefix}13.${Font_color_suffix} 查看 ShadowsocksR 日志
+ ${Green_font_prefix}10.${Font_color_suffix} START ShadowsocksR
+ ${Green_font_prefix}11.${Font_color_suffix} STOP ShadowsocksR
+ ${Green_font_prefix}12.${Font_color_suffix} RESTART ShadowsocksR
+ ${Green_font_prefix}13.${Font_color_suffix} View ShadowsocksR Logs
 ————————————
- ${Green_font_prefix}14.${Font_color_suffix} 其他功能
- ${Green_font_prefix}15.${Font_color_suffix} 升级脚本
+ ${Green_font_prefix}14.${Font_color_suffix} Other
+ ${Green_font_prefix}15.${Font_color_suffix} Update Script
  "
 	menu_status
-	echo && stty erase '^H' && read -p "请输入数字 [1-15]：" num
+	echo && stty erase '^H' && read -p "Please enter NUMBER [1-15]：" num
 case "$num" in
 	1)
 	Install_SSR
@@ -1885,7 +1885,7 @@ case "$num" in
 	Update_Shell
 	;;
 	*)
-	echo -e "${Error} 请输入正确的数字 [1-15]"
+	echo -e "${Error} Please enter the correct NUMBER[1-15]"
 	;;
 esac
 fi
