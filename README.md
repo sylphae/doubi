@@ -1,4 +1,4 @@
-https://github.com/ToyoDAdoubi/doubi
+Sources: https://github.com/ToyoDAdoubi/doubi
 
 # 一个逗比写的逗比脚本
 
